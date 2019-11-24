@@ -1,0 +1,101 @@
+/**
+ *  Styles specific to the page.
+ */
+ 
+.navabar
+{
+    background-color: black;
+    position: sticky;
+    
+    height: 50px;
+}
+
+.navabar .logo
+{
+    display: block;
+    
+    /* This is sloppy. Consider fixing it (perhaps using JavaScript?) */
+    height: 50px;
+    width: 50px;
+}
+
+.navabar .action
+{
+    flex-grow: 2;
+}
+
+html, body
+{
+    margin: 0px;
+    padding-bottom: 50px;
+}
+
+.logo
+{
+    box-shadow: 1px 2px 4px rgba(100, 100, 100, 0.6);
+    border-radius: 100%;
+    background-color: white;
+}
+
+.content
+{
+    max-width: 700px;
+    box-shadow: -3px 2px 4px rgba(0, 0, 0, 0.3);
+    
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 30px;
+    
+    border-radius: 5px;
+    
+    background-color: white;
+    
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.lowerLinks
+{
+    border-top: 1px solid black;
+    text-align: center;
+    font: 12pt Serif;
+}
+
+.lowerLinks a
+{
+    color: gray !important;
+}
+
+@media print
+{
+    .navabar
+    {
+        display: none;
+    }
+    
+    body
+    {
+        padding: 25px;
+        background: white;
+    }
+    
+    .content
+    {
+        width: 100%;
+        border: none;
+    }
+}
+
+@media screen and (max-width(500px))
+{
+    .content
+    {
+        border: none;
+        width: 100%;
+    }
+    
+    .navabar
+    {
+        position: relative;
+    }
+}
