@@ -285,12 +285,12 @@ function BackgroundAnimationWorld(worldManager)
         }
         
         // The mountains.
-        for (let x = -groundWidth / 2; x < groundWidth / 2; x += groundWidth / 20)
+        for (let x = -groundWidth / 4; x < groundWidth / 4; x += groundWidth / 20)
         {
             worldCube.transformMat.save();
             worldCube.transformMat.scale(groundWidth / 100, groundLength, groundLength / 100);
             
-            worldCube.transformMat.translate([x, 0, groundLength - 100]);
+            worldCube.transformMat.translate([x, 100, groundLength - 130 - Math.cos(x) * 50]);
             
             worldCube.transformMat.transpose();
             worldCube.transformMat.rotateZ(Math.sin(x) * 3 / 50 + Math.PI);
@@ -298,7 +298,7 @@ function BackgroundAnimationWorld(worldManager)
             worldCube.transformMat.rotateX(Math.sin(Math.tan(x) * 3));
             worldCube.transformMat.transpose();
             
-            worldCube.transformMat.translate([0, groundDepth - 50, 0]);
+            worldCube.transformMat.translate([0, groundDepth + 50, 0]);
             
             
             renderer.setTint(new Vector3
@@ -500,7 +500,7 @@ function startBackgroundAnimation(worldManager, scrolledElement)
     let scene = new BackgroundAnimationWorld(worldManager);
     
     scene.setDestinationCanvas(backgroundAnimationCanvas);
-    scene.outputResolution = 1 / 3;
+    scene.outputResolution = 1 / 4.0;
     
     window.addEventListener("scroll", () =>
     {
