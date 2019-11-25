@@ -145,9 +145,6 @@ function LogoWorld()
         
         // Handle camera rotation.
         renderer.worldMatrix.rotateZ(worldZRotation);
-        
-        worldZRotation = (worldZRotation * worldRotateFactor 
-                + worldZRotationTarget * (1 - worldRotateFactor));
     };
     
     this.animate = (renderer, deltaT) =>
@@ -175,7 +172,6 @@ function LogoWorld()
         }
         
         // Update the modifier.
-        modifier = (modifier * modifierChangeFactor + modifierTarget * (1.0 - modifierChangeFactor));
         
         firstBulb.transformMat.rotateY(Math.PI * 0.9 + rotationAmount * Math.PI / 2);
         secondBulb.transformMat.rotateY(Math.PI * 5/6 - rotationAmount * Math.PI / 2);
@@ -184,6 +180,13 @@ function LogoWorld()
         
         firstBulb.transformMat.translate([0, 100, 40]);
         secondBulb.transformMat.translate([Math.sin(time / 500), 100, 38]);
+        
+        for (let i = 0; i < Math.min(deltaT, 100); i += 5)
+        {
+            worldZRotation = (worldZRotation * worldRotateFactor 
+                    + worldZRotationTarget * (1 - worldRotateFactor));
+            modifier = (modifier * modifierChangeFactor + modifierTarget * (1.0 - modifierChangeFactor));
+        }
     };
     
     this.cleanup = (renderer) =>
