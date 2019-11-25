@@ -111,6 +111,8 @@ function Renderer()
 
     me.zMin = 1;
     me.zMax = 4000;
+    
+    me.lastClear = [0, 0, 0, 1];
 
     me.outputCanvas = document.createElement("canvas");
     me.gl = me.outputCanvas.getContext("webgl");
@@ -443,7 +445,14 @@ function Renderer()
         handleUniform("u_mousePosition", vector2SetFunction, undefined, vector2TransformInput);
         handleUniform("u_objectId", (location, value) => gl.uniform1f(location, value));
         handleUniform("u_fogDecay", (location, value) => gl.uniform1f(location, value), 10000.0); // Set the default fog amount.
-        handleUniform("u_fogColor", vector3SetFunction, new Vector3(0, 0, 0), vector3TransformInput);
+        
+        handleUniform("u_fogColor", (location, values) =>
+        {
+            me.setClearColor([values[0], values[1], values[2], me.lastClear[3] || 1.0]);
+            
+            vector3SetFunction(location, values);
+        }, new Vector3(0, 0, 0), vector3TransformInput);
+        
         handleUniform("u_tint", vector3SetFunction, new Vector3(0, 0, 0), vector3TransformInput);
 
         gl.enable(gl.DEPTH_TEST);
@@ -538,7 +547,14 @@ function Renderer()
     me.setFogColor = (newColor) =>
     {
         updateUniform(me.uniforms.u_fogColor, newColor);
-        me.gl.clearColor(newColor.x, newColor.y, newColor.z, 1.0);
+    };
+    
+    // Sets the clear color, but NOT the fog color.
+    //Takes an array of components [r, g, b, a].
+    me.setClearColor = (newColor) =>
+    {
+        me.gl.clearColor(newColor[0], newColor[1], newColor[2], newColor[3]);
+        me.lastClear = newColor;
     };
 
     // Change how rapidly objects moving into the background
@@ -670,6 +686,12 @@ function Renderer()
     {
         me.cameraMatrix = Mat44Helper.createLookAtMatrix(cameraPosition, lookAtPoint, lookAtUpDirection);
 
+        me.updateCameraUniform();
+    };
+    
+    // Update the camera, but JUST THE UNIFORM.
+    me.updateCameraUniform = () =>
+    {
         updateUniform(me.uniforms.u_cameraMatrix, me.cameraMatrix);
     };
     
@@ -724,8 +746,8 @@ function Renderer()
 
         if (me.outputCanvas.width !== width || me.outputCanvas.height !== height || force)
         {
-            me.outputCanvas.width = width;
-            me.outputCanvas.height = height;
+            me.outputCanvas.width = width || 1; // Don't go to zero.
+            me.outputCanvas.height = height || 1;
 
             var aspect = gl.drawingBufferHeight / gl.drawingBufferWidth;
             var fovY = me.fovY / 180.0 * Math.PI;

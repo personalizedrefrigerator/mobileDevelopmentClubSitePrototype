@@ -77,7 +77,7 @@ function WorldObject()
         // TODO Test this for compliance with both left and
         //right multiplication matricies (e.g. do we need to
         //transpose?).
-        renderer.worldMatrix.rightMulAndSet(me.getTransform());
+        renderer.worldMatrix.leftMulAndSet(me.getTransform());
         
         if (me.preRender)
         {
@@ -122,6 +122,7 @@ function WorldBox()
     this.objects = [];
     this.unregisteredObjects = [];
     this.destinationCtx = undefined;
+    this.outputResolution = 1;
     
     // When asked to register models,
     //simply do that for all sub-objects.
@@ -160,11 +161,11 @@ function WorldBox()
         }
     };
     
-    this.cleanupChildren = function()
+    this.cleanupChildren = function(renderer)
     {
         for (var i = 0; i < me.objects.length; i++)
         {
-            me.objects[i].cleanup();
+            me.objects[i].cleanup(renderer);
         }
     };
     
@@ -174,18 +175,21 @@ function WorldBox()
     
     this.render = function(renderer)
     {
-        var canvas = me.destinationCtx.canvas;
-    
-        // Update the renderer's size if necessary.
-        renderer.updateViewIfNeeded(canvas.clientWidth,
-                                       canvas.clientHeight,
-                                       false); // Don't force.
-        
-        // Update the size of the rendering context if needed.
-        if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight)
+        if (me.destinationCtx)
         {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
+            var canvas = me.destinationCtx.canvas;
+        
+            // Update the renderer's size if necessary.
+            renderer.updateViewIfNeeded(canvas.clientWidth * me.outputResolution,
+                                           canvas.clientHeight * me.outputResolution,
+                                           false); // Don't force.
+            
+            // Update the size of the rendering context if needed.
+            if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight)
+            {
+                canvas.width = canvas.clientWidth * me.outputResolution || 1; // Don't go to zero.
+                canvas.height = canvas.clientHeight * me.outputResolution || 1;
+            }
         }
         
         let currentObject;
@@ -193,6 +197,8 @@ function WorldBox()
         renderer.clear();
     
         renderer.saveUniforms();
+        renderer.worldMatrix.save();
+        renderer.worldMatrix.leftMulAndSet(me.getTransform());
         
         // If a function has been implemented that handles 
         //the application of renderer settings, call it.
@@ -200,8 +206,6 @@ function WorldBox()
         {
             this.preRender.call(me, renderer);
         }
-        
-        renderer.updateCamera();
         
         // Render every child object.
         for (let i = 0; i < me.objects.length; i++)
@@ -211,23 +215,33 @@ function WorldBox()
             // Sub-objects might change uniforms.
             //Save and restore them.
             renderer.saveUniforms();
+            renderer.worldMatrix.save();
             
-            if (!me.onRender)
+            // Render using the default method only if the
+            //rendering method hasn't been overridden or unless
+            //it requests default rendering.
+            if (!me.onRender || me.onRender(currentObject, renderer) === true)
             {
                 currentObject.render(renderer);
             }
-            else
-            {
-                me.onRender(currentObject, renderer);
-            }
             
             renderer.restoreUniforms();
+            renderer.worldMatrix.restore();
         }
         
         renderer.restoreUniforms();
+        renderer.worldMatrix.restore();
         
-        // Render to the destination context.
-        renderer.display(me.destinationCtx);
+        if (me.destinationCtx)
+        {
+            // Clear the destination context.
+            me.destinationCtx.clearRect(0, 0, 
+                    me.destinationCtx.canvas.width, 
+                    me.destinationCtx.canvas.height);
+            
+            // Render to the destination context.
+            renderer.display(me.destinationCtx);
+        }
     };
     
     this.addObject = function(newObject)
@@ -261,41 +275,29 @@ function FullWorld()
         me.worlds.push(world);
     };
     
-    this.animate = function()
+    this.updateWorld = function(world, deltaT)
     {
-        const nowTime = (new Date()).getTime();
-        const deltaT = nowTime - me.lastAnimateTime;
+        me.renderer.saveUniforms();
         
-        for (let i = 0; i < me.worlds.length; i++)
-        {
-            me.worlds[i].animate(me.renderer, deltaT);
-        }
+        world.animate(me.renderer, deltaT);
+        world.render(me.renderer);
+        world.cleanup(me.renderer);
         
-        me.lastAnimateTime = nowTime;
-    };
-    
-    this.render = function()
-    {
-        for (let i = 0; i < me.worlds.length; i++)
-        {
-            me.worlds[i].render(me.renderer);
-        }
-    };
-    
-    this.cleanup = function()
-    {
-        for (let i = 0; i < me.worlds.length; i++)
-        {
-            me.worlds[i].cleanup(me.renderer);
-        }
+        me.renderer.restoreUniforms();
     };
     
     this.loopOnce = function()
     {
+        const nowTime = (new Date()).getTime();
+        const deltaT = nowTime - me.lastAnimateTime;
+        
         // Animate and render.
-        me.animate();
-        me.render();
-        me.cleanup();
+        for (let i = 0; i < me.worlds.length; i++)
+        {
+            me.updateWorld(me.worlds[i], deltaT);
+        }
+        
+        me.lastAnimateTime = nowTime;
     };
     
     this.loop = function()

@@ -779,9 +779,9 @@ ModelHelper.Objects.register = function(key, verticies, normals, texCoords, norm
                      JSHelper.getArrayOfRandomColors(verticies.length,
                          false, // No rounding
                          3, // Three values/color.
-                         0.2, 0.6, // Min red, max red.
-                         0.2, 0.6, // Minimum green, maximum green.
-                         0.2, 0.6); // Min blue, max blue.
+                         0.5, 0.6, // Min red, max red.
+                         0.5, 0.6, // Minimum green, maximum green.
+                         0.5, 0.6); // Min blue, max blue.
         }
         
         return newObject.privateInfo.vertexColors;
@@ -899,4 +899,49 @@ ModelHelper.Objects.register("Cube",
     50, 0, 50,
     0, 0, 0, 
     50, 0, 0
-], undefined, undefined);
+], undefined,
+(
+    // Get a cube's normals!
+    //Note: Copied from Objects.js
+    //in the older version of this WebGL 
+    //support library.
+    function (verticiesCount)
+    {
+        var locations = [];
+        var points = [];
+        var j;
+        
+        var face = 0;
+
+        for(var i = 0; i < verticiesCount / 2; i++)
+        {
+            face = i;
+            
+            points = 
+            [
+                [0, 0],
+                [0, 1],
+                [1, 1],
+                [0, 0],
+                [1, 1],
+                [1, 0]
+            ];
+            
+            for(j = 0; j < points.length; j++)
+            {
+                if(face === 0 || face === 2)
+                {
+                    locations.push(1 - points[j][0]);
+                    locations.push(1 - points[j][1]);
+                }
+                else
+                {
+                    locations.push(points[j][0]);
+                    locations.push(points[j][1]);
+                }
+            }
+        }
+        
+        return locations;
+    }
+)(36));

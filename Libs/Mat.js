@@ -352,6 +352,13 @@ function Mat(width, height)
     this.save = function()
     {
         saveStack.push(this.getArrayCopy());
+        
+        // If the save stack is getting long, warn.
+        if (saveStack.length > 10000)
+        {
+            console.warn("SaveStack.length = " + saveStack.length + ". Check for resource leaks.");
+            window.leakedMat = this;
+        }
     };
     
     this.restore = function()
