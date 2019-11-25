@@ -117,6 +117,7 @@ function LogoWorld()
     let modifier = 0.0;
     let modifierTarget = 0.0;
     let modifierChangeFactor = 0.96;
+    let updateFactor = 30;
     
     // We don't want all logos to look exactly the same.
     //Give each a time offset.
@@ -181,12 +182,9 @@ function LogoWorld()
         firstBulb.transformMat.translate([0, 100, 40]);
         secondBulb.transformMat.translate([Math.sin(time / 500), 100, 38]);
         
-        for (let i = 0; i < Math.min(deltaT, 100); i += 5)
-        {
-            worldZRotation = (worldZRotation * worldRotateFactor 
-                    + worldZRotationTarget * (1 - worldRotateFactor));
-            modifier = (modifier * modifierChangeFactor + modifierTarget * (1.0 - modifierChangeFactor));
-        }
+        worldZRotation = (worldZRotation * Math.pow(worldRotateFactor, deltaT / updateFactor) 
+                    + worldZRotationTarget * (1 - Math.pow(worldRotateFactor, deltaT / updateFactor)));
+        modifier = (modifier * Math.pow(modifierChangeFactor, deltaT / updateFactor) + modifierTarget * (1.0 - Math.pow(modifierChangeFactor, deltaT / updateFactor)));
     };
     
     this.cleanup = (renderer) =>
