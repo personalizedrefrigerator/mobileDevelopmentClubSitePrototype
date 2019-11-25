@@ -172,8 +172,6 @@ function LogoWorld()
             modifierTarget = 0;
         }
         
-        // Update the modifier.
-        
         firstBulb.transformMat.rotateY(Math.PI * 0.9 + rotationAmount * Math.PI / 2);
         secondBulb.transformMat.rotateY(Math.PI * 5/6 - rotationAmount * Math.PI / 2);
         secondBulb.transformMat.rotateZ(Math.abs(Math.sin(rotationAmount)) * Math.PI / 32);
@@ -182,9 +180,18 @@ function LogoWorld()
         firstBulb.transformMat.translate([0, 100, 40]);
         secondBulb.transformMat.translate([Math.sin(time / 500), 100, 38]);
         
-        worldZRotation = (worldZRotation * Math.pow(worldRotateFactor, deltaT / updateFactor) 
+        
+        // Update the modifiers
+        if (worldZRotation != worldZRotationTarget)
+        {
+            worldZRotation = (worldZRotation * Math.pow(worldRotateFactor, deltaT / updateFactor) 
                     + worldZRotationTarget * (1 - Math.pow(worldRotateFactor, deltaT / updateFactor)));
-        modifier = (modifier * Math.pow(modifierChangeFactor, deltaT / updateFactor) + modifierTarget * (1.0 - Math.pow(modifierChangeFactor, deltaT / updateFactor)));
+        }
+        
+        if (modifier != modifierTarget)
+        {
+            modifier = (modifier * Math.pow(modifierChangeFactor, deltaT / updateFactor) + modifierTarget * (1.0 - Math.pow(modifierChangeFactor, deltaT / updateFactor)));
+        }
     };
     
     this.cleanup = (renderer) =>
