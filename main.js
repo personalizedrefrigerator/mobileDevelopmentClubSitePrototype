@@ -1,5 +1,13 @@
 "use strict";
 
+const ANIM_SHRINK_GROW_DURATION = 500,
+      URL_PAGE_SPECIFIER_START = "?=";
+
+/**
+ *  A very messy file to handle scripts specific to
+ * this page. TODO This file needs a refactoring.
+ */
+
 function LogoBulb()
 {
     const me = this;
@@ -157,7 +165,7 @@ function LogoWorld()
         firstBulb.transformMat.save();
         secondBulb.transformMat.save();
         
-        let rotationAmount = Math.pow(2 * Math.tan(time / 120000) * Math.max(0.05, Math.min(0.6, Math.sin(time / 5000))), 3) + Math.sin(time / 60000) / 4;
+        let rotationAmount = Math.pow(2 * Math.tan(time / 120000) * Math.max(0.05, Math.min(0.6, Math.sin(time / 500000))), 3) + Math.sin(time / 60000) / 4;
         
         // Also, check: Are we to rotate?
         if (me.destinationCtx 
@@ -483,14 +491,17 @@ function initializeMainMenu()
     let logoDisplay = document.querySelector(".navabar .logo");
     let menuBlade = document.querySelector("#mainBlade"); // Lets call them "blades" --
                                                           //I think that's what they're called.
-    
-    logoDisplay.addEventListener("click", () =>
+    const showHideBlade = () =>
     {
         menuBlade.classList.toggle("bladeClosed");
         menuBlade.classList.toggle("bladeOpen");
         
         logoDisplay.classList.toggle("requestRotate");
-    });
+    };
+    
+    // Click listeners for showing/hiding.
+    logoDisplay.addEventListener("click", showHideBlade);
+    menuBlade.addEventListener  ("click", showHideBlade);
 }
 
 function startBackgroundAnimation(worldManager, scrolledElement)
@@ -524,9 +535,86 @@ function startBackgroundAnimation(worldManager, scrolledElement)
     backgroundAnimationCanvas.style.backgroundColor = "#000000";
 }
 
+/**
+ * Display a single page.
+ */
+async function displayPage(name)
+{
+    // Get elements.
+    let contentZone = document.querySelector("#mainData");
+    
+    // Animate it!
+    contentZone.parentElement.classList.add("shrinkGrow");
+    
+    await PageDataHelper.awaitLoad(); // Make sure we've loaded the page.
+    
+    // Default values
+    name = name || PageDataHelper.defaultPage;
+    
+    // Set content.
+    contentZone.innerHTML = PageDataHelper.pages[name];
+    
+    // Cleanup animation
+    setTimeout(() =>
+    {
+        contentZone.parentElement.classList.remove("shrinkGrow");
+    }, ANIM_SHRINK_GROW_DURATION); // We assume it's safe after a ANIM_SHRINK_GROW_DURATION.
+}
+
+/**
+ * Create buttons and connect them to actions.
+ */
+function initializePages()
+{
+    const createPage = (pageName, buttonZones) =>
+    {
+        for (let i = 0; i < buttonZones.length; i++)
+        {
+            HTMLHelper.addButton(pageName, buttonZones[i], () =>
+            {
+                displayPage(pageName);
+            });
+        }
+    };
+
+    // Load buttons.
+    PageDataHelper.awaitLoad().then((data) =>
+    {
+        let buttonAreas = document.querySelectorAll(".navigationButtons");
+        
+        // Create a button for every page.
+        for (let pageName in data)
+        {
+            createPage(pageName, buttonAreas);
+        }
+    });
+    
+    const specifierIndex = location.href.indexOf(URL_PAGE_SPECIFIER_START);
+    
+    // Check the URL -- has a specific page been linked to?
+    if (location.href && specifierIndex > location.href.lastIndexOf("/"))
+    {
+        // Get the page's name.
+        let requestedPage = location.href.substring
+        (
+            specifierIndex + URL_PAGE_SPECIFIER_START.length
+        );
+        
+        // And display it.
+        displayPage(requestedPage);
+    }
+    else
+    {
+        displayPage(); // Show the default page.
+    }
+}
+
 function main()
 {
     const worldManager = new FullWorld();
+    
+    // Create and enable buttons.
+    initializePages();
     
     // Connect the logo in the navabar to a
     //sliding menu.

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang = "en">
 <head>
-    <title>Mobile Dev Club</title>
-    <meta name = "viewport" content = "width=device-width,height=device-height,initial-scale=1.0"/>
     <meta charset = "utf-8"/>
+    <meta name = "viewport" content = "width=device-width,height=device-height,initial-scale=1.0"/>
+    
+    <title>Mobile Dev Club</title>
     </style>
     
     
@@ -54,32 +55,36 @@
     <script src = "Libs/Worlds.js"></script>
     
     <!-- Include page-specific files. -->
+    <script src = "pages.js"></script>
     <script src = "main.js"></script>
     
     <link rel = "stylesheet" type = "text/css" href = "main.css"/>
 </head>
 <body>
-    <div class = "navabar">
+    <div class = "navabar navigationButtons">
         <canvas class="logo"></canvas>
         <div id = "title">Mobile Development Club</div>
         <div class = "spacer"></div>
         
-        <!-- TODO Generate these buttons with JS. -->
-        <button>About</button>
-        <button>Events</button>
-        <button>Join</button>
+        <!-- Additional content filled with JS. -->
     </div>
     
-    <div id = "mainBlade" class = "blade bladeClosed">
-    <button>Home</button>
+    <!-- A side pane called a (I think) blade. -->
+    <div id = "mainBlade" class = "blade bladeClosed navigationButtons">
+        <!-- Filled by JS. -->
     </div>
     
+    <!-- The page's main content. -->
     <div class = "content">
-        <h1>Local Hack Day: Build @ UW</h1>
-        <p>On December 7<sup>th</sup> from 8:00 AM to 9:00 PM, the University of Washington's
-           Mobile Development Club will be hosting a hackathon!</p>
+        <div id = "mainData"> <!-- This is where loaded content will go. -->
+            <div id = "loader" alt = "Loading content! If you're having trouble, please contact us through our RSO page!">Loading...</div>
+            
+            <noscript>
+                Please enable JavaScript! This page requires it to function properly!
+            </noscript>
+        </div>
         <div class = "lowerLinks">
-        <a href = "https://huskylink.washington.edu/organization/appdev">Visit our Registered Student Organization Page</a>
+            <a href = "https://huskylink.washington.edu/organization/appdev">Visit our Registered Student Organization Page</a>
         </div>
     </div>
     

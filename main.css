@@ -2,6 +2,13 @@
  *  Styles specific to the page.
  */
  
+ @keyframes shrinkGrow
+ {
+    0% { transform: scale(1, 1); }
+    50% { transform: scale(0, 0); }
+    100% { transform: scale(1, 1); }
+ }
+ 
 .navabar
 {
     background-color: black;
@@ -115,10 +122,18 @@ html, body
     bottom: 0px;
     left: 0px;
     
+    margin-left: 0px;
+    
+    z-index: 10;
+    transform: scale(1, 1.001); /* Works around a layering bug
+                                   in Firefox. */
+    
     display: flex;
     flex-direction: column;
     
     max-width: 300px;
+    width: 100vw;
+    filter: opacity(100%);
     
     transition: 0.5s linear all;
 }
@@ -140,14 +155,14 @@ html, body
 
 .bladeClosed
 {
-    margin-left: -300px;
-    width: 0vw;
+    margin-left: -300px; /* The blade's maximum width. */
+    filter: opacity(0%);
 }
 
 .bladeOpen
 {
-    width: 100vw;
     margin-left: 0px;
+    filter: opacity(100%);
 }
 
 .content
@@ -182,6 +197,18 @@ html, body
     left: 0;
     width: 100vw;
     height: 100vh;
+}
+
+#mainData
+{   
+    transform: scale(1, 1);
+    
+    transition: 0.5s ease all;
+}
+
+.shrinkGrow
+{
+    animation: 0.5s ease shrinkGrow !important;
 }
 
 .lowerLinks
